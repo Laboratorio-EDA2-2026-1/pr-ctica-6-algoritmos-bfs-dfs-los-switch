@@ -1,0 +1,168 @@
+def encontrar_intervalo(A, q):
+    """
+    Encuentra el intervalo más pequeño que contiene a q en el arreglo A.
+    
+    Args:
+        A: Lista de enteros no negativos
+        q: Número racional no negativo
+        
+    Returns:
+        Lista con las dos posiciones [i, j] donde A[i] <= q <= A[j]
+    """
+    # Creamos una lista de tuplas (valor, posición_original)
+    elementos = [(valor, idx) for idx, valor in enumerate(A)]
+    
+    def dividir_y_encontrar(arr):
+        """
+        Función recursiva que divide el arreglo y encuentra el intervalo
+        """
+        # Caso base: arreglo con un solo elemento
+        if len(arr) == 1:
+            return arr[0]  # Retorna (valor, posición)
+        
+        # Dividir el arreglo en dos mitades
+        mitad = len(arr) // 2
+        izquierda = dividir_y_encontrar(arr[:mitad])
+        derecha = dividir_y_encontrar(arr[mitad:])
+        
+        # Combinar resultados
+        return combinar_resultados(izquierda, derecha)
+    
+    def combinar_resultados(izq, der):
+        """
+        Combina los resultados de las mitades izquierda y derecha
+        """
+        # Extraer todos los candidatos posibles
+        candidatos = []
+        
+        # Si izq es una tupla simple (valor, pos)
+        if isinstance(izq, tuple) and len(izq) == 2 and isinstance(izq[0], (int, float)):
+            candidatos.append(izq)
+        else:
+            # Si izq es un par de candidatos (izq_cand, der_cand)
+            candidatos.extend(izq)
+        
+        # Si der es una tupla simple (valor, pos)
+        if isinstance(der, tuple) and len(der) == 2 and isinstance(der[0], (int, float)):
+            candidatos.append(der)
+        else:
+            # Si der es un par de candidatos (izq_cand, der_cand)
+            candidatos.extend(der)
+        
+        # Filtrar candidatos duplicados
+        candidatos_unicos = []
+        for cand in candidatos:
+            if cand not in candidatos_unicos:
+                candidatos_unicos.append(cand)
+        
+        # Encontrar el mejor candidato por la izquierda (<= q)
+        candidatos_izq = [(val, pos) for val, pos in candidatos_unicos if val <= q]
+        # Encontrar el mejor candidato por la derecha (>= q)
+        candidatos_der = [(val, pos) for val, pos in candidatos_unicos if val >= q]
+        
+        # Si tenemos candidatos válidos en ambos lados
+        if candidatos_izq and candidatos_der:
+            mejor_izq = max(candidatos_izq, key=lambda x: x[0])  # Mayor valor <= q
+            mejor_der = min(candidatos_der, key=lambda x: x[0])  # Menor valor >= q
+            return (mejor_izq, mejor_der)
+        elif candidatos_izq:
+            # Solo tenemos candidatos por izquierda
+            mejor_izq = max(candidatos_izq, key=lambda x: x[0])
+            return (mejor_izq, mejor_izq)
+        elif candidatos_der:
+            # Solo tenemos candidatos por derecha
+            mejor_der = min(candidatos_der, key=lambda x: x[0])
+            return (mejor_der, mejor_der)
+        else:
+            # Caso extremo: usar los valores mínimo y máximo
+            min_cand = min(candidatos_unicos, key=lambda x: x[0])
+            max_cand = max(candidatos_unicos, key=lambda x: x[0])
+            return (min_cand, max_cand)
+    
+    # Llamada inicial a la función recursiva
+    resultado = dividir_y_encontrar(elementos)
+    
+    # Extraer las posiciones del resultado
+    izquierda, derecha = resultado
+    return [izquierda[1], derecha[1]]
+
+def ingresar_arreglo():
+    """
+    Función para que el usuario ingrese el arreglo
+    """
+    print("=== INGRESO DE DATOS ===")
+    
+    # Ingresar el arreglo
+    while True:
+        try:
+            entrada = input("Ingrese los elementos del arreglo separados por espacios (ej: 4 0 7 11 9 12 56 3): ")
+            elementos = entrada.split()
+            A = [int(elemento) for elemento in elementos]
+            
+            if len(A) == 0:
+                print("Error: El arreglo no puede estar vacío")
+                continue
+                
+            if any(x < 0 for x in A):
+                print("Error: Todos los elementos deben ser no negativos")
+                continue
+                
+            break
+        except ValueError:
+            print("Error: Por favor ingrese solo números enteros separados por espacios")
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+    
+    return A
+
+def ingresar_q():
+    """
+    Función para que el usuario ingrese el valor q
+    """
+    while True:
+        try:
+            q_str = input("Ingrese el valor de q (ej: 8.13): ")
+            q = float(q_str)
+            
+            if q < 0:
+                print("Error: q debe ser no negativo")
+                continue
+                
+            break
+        except ValueError:
+            print("Error: Por favor ingrese un número válido")
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+    
+    return q
+
+# Programa principal
+if __name__ == "__main__":
+    print("PROBLEMA DEL INTERVALO")
+    print("Encuentra el intervalo más pequeño que contiene a q en un arreglo\n")
+    
+    # Ingresar datos
+    A = ingresar_arreglo()
+    q = ingresar_q()
+    
+    print(f"\n=== RESULTADOS ===")
+    print(f"Arreglo ingresado: {A}")
+    print(f"Valor de q: {q}")
+    
+    # Encontrar el intervalo
+    resultado = encontrar_intervalo(A, q)
+    
+    print(f"Intervalo encontrado: {resultado}")
+    print(f"Valores: A[{resultado[0]}] = {A[resultado[0]]}, A[{resultado[1]}] = {A[resultado[1]]}")
+    
+    # Mostrar explicación
+    print(f"\n=== EXPLICACIÓN ===")
+    print(f"El intervalo más pequeño que contiene a {q} es:")
+    print(f"• Límite inferior: {A[resultado[0]]} (posición {resultado[0]})")
+    print(f"• Límite superior: {A[resultado[1]]} (posición {resultado[1]})")
+    
+    if A[resultado[0]] <= q <= A[resultado[1]]:
+        print("✓ q está dentro del intervalo encontrado")
+    else:
+        print("⚠ Nota: q no está estrictamente dentro del intervalo (puede ocurrir en casos límite)")
+    
