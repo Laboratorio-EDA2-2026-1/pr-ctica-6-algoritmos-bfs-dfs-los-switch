@@ -1,0 +1,86 @@
+def nreinas2(N, A):
+    """
+    Resuelve el problema de las N reinas con posiciones no disponibles.
+    Args:
+        N: Tamaño del tablero (1 ≤ N ≤ 8)
+        A: Lista de filas no disponibles por columna (0 ≤ len(A) ≤ N)
+    Returns:
+        Lista P donde P[i] indica la fila de la reina en la columna i,
+        o None si no hay solución.
+    """
+
+    def no_conflictos(tablero, actual):
+        """Verifica que la reina colocada no entre en conflicto con las anteriores."""
+        for i in range(actual):
+            # Verifica si están en la misma fila
+            if tablero[i] == tablero[actual]:
+                return False
+            # Verifica si están en la misma diagonal
+            if abs(tablero[actual] - tablero[i]) == abs(actual - i):
+                return False
+        return True  # No hay conflicto, se puede colocar la reina
+
+    def dfs(tablero, actual):
+        """Coloca las reinas recursivamente usando búsqueda en profundidad (DFS)."""
+        if actual == N:
+            # Caso base: si ya colocamos N reinas, hay una solución válida
+            return True
+
+        # Intentar colocar una reina en cada fila de la columna actual
+        for fila in range(N):
+            # Si la posición (columna actual, fila) está bloqueada por A, se omite
+            if actual < len(A) and A[actual] == fila:
+                continue
+            
+            tablero[actual] = fila  # Colocar la reina tentativamente
+
+            # Verificar si no hay conflictos con reinas anteriores
+            if no_conflictos(tablero, actual):
+                # Llamada recursiva para colocar la siguiente reina
+                if dfs(tablero, actual + 1):
+                    return True  # Si encuentra solución, se detiene
+        
+        # Si no se puede colocar una reina en esta columna, retrocede (backtracking)
+        return False
+
+    # Inicializa el tablero con -1 (sin reinas colocadas)
+    tablero = [-1] * N
+
+    # Inicia la búsqueda de una solución
+    if dfs(tablero, 0):
+        return tablero  # Devuelve la primera solución encontrada
+    else:
+        return None  # No hay solución posible
+
+
+def imprimir_tablero2(solucion, A):
+    """Imprime el tablero con las reinas y las posiciones bloqueadas."""
+    if solucion is None:
+        print("No hay solución")
+        return
+
+    N = len(solucion)
+    print("Solución:", solucion)
+    print("Representación del tablero:")
+
+    # Recorre las filas del tablero
+    for fila in range(N):
+        linea = ""  # Línea que se imprimirá
+        for col in range(N):
+            # Si la posición está bloqueada según A, muestra una X
+            if col < len(A) and A[col] == fila:
+                linea += "X "
+            # Si hay una reina, muestra una Q
+            elif solucion[col] == fila:
+                linea += "Q "
+            # Si está vacía, muestra un punto
+            else:
+                linea += ". "
+        print(linea)  # Imprime la fila completa
+
+
+# Ejemplo de uso del programa
+N = 4
+A = [1, 3, 0, 2]  # Posiciones bloqueadas
+P = nreinas2(N, A)  # Busca una solución
+imprimir_tablero2(P, A)  # Imprime el resultado
