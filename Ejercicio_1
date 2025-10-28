@@ -10,38 +10,52 @@ def n_reinas_todas(N):
     
     def no_conflictos(tablero, actual):
         """
-        Verifica que no hay conflictos de fila ni diagonales 
-        con las reinas ya colocadas.
+        Verifica que la reina colocada en la columna 'actual' no tenga
+        conflictos con las reinas ya colocadas en columnas anteriores.
         """
         for i in range(actual):
-            if tablero[i] == tablero[actual] or abs(tablero[actual] - tablero[i]) == abs(actual - i):
+            # Revisar si hay conflicto en la misma fila
+            if tablero[i] == tablero[actual]:
                 return False
-        return True
+            # Revisar si hay conflicto en diagonales
+            if abs(tablero[actual] - tablero[i]) == abs(actual - i):
+                return False
+        return True  # No hay conflictos
 
     def dfs(tablero, actual, tamaño, soluciones):
         """
-        Coloca reinas recursivamente con búsqueda en profundidad (DFS),
-        guardando todas las soluciones.
+        Coloca reinas recursivamente usando DFS y guarda todas las soluciones.
+        
+        Args:
+            tablero: Lista que representa la posición de las reinas en cada columna.
+            actual: Columna actual donde se intenta colocar la reina.
+            tamaño: Número total de columnas (y filas) del tablero.
+            soluciones: Lista donde se almacenan todas las soluciones encontradas.
         """
+        # Caso base: si ya colocamos reinas en todas las columnas, guardar solución
         if actual == tamaño:
-            # Guardar una copia de la solución
-            soluciones.append(tablero.copy())
+            soluciones.append(tablero.copy())  # Guardar una copia del tablero actual
             return
         
+        # Intentar colocar la reina en todas las filas de la columna 'actual'
         for fila in range(tamaño):
-            tablero[actual] = fila
-            if no_conflictos(tablero, actual):
-                dfs(tablero, actual + 1, tamaño, soluciones)
+            tablero[actual] = fila  # Colocar temporalmente la reina
+            if no_conflictos(tablero, actual):  # Verificar conflictos
+                dfs(tablero, actual + 1, tamaño, soluciones)  # Continuar con la siguiente columna
 
+    # Inicializar el tablero con -1, indicando que no hay reinas colocadas
     tablero = [-1] * N
-    soluciones = []
-    dfs(tablero, 0, N, soluciones)
-    return soluciones
+    soluciones = []  # Lista para almacenar todas las soluciones
+    dfs(tablero, 0, N, soluciones)  # Iniciar la búsqueda
+    return soluciones  # Devolver todas las soluciones encontradas
 
 
 def imprimir_tablero(solucion):
     """
     Imprime visualmente el tablero con las posiciones de las reinas.
+    
+    Args:
+        solucion: Lista P con la posición de la reina en cada columna.
     """
     if not solucion:
         print("No hay soluciones")
@@ -51,18 +65,22 @@ def imprimir_tablero(solucion):
     print("Solución:", solucion)
     print("Representación del tablero:\n")
     
+    # Imprimir encabezado de columnas
     print("   " + " ".join(str(i) for i in range(N)))
     
+    # Imprimir cada fila del tablero
     for fila in range(N):
+        # Si la reina está en esa fila y columna, poner 'Q', si no '.', para visualizar el tablero
         fila_tablero = ["Q" if solucion[col] == fila else "." for col in range(N)]
         print(f"{fila}: " + " ".join(fila_tablero))
-    print("\n")
+    print("\n")  # Línea en blanco para separar soluciones
 
 
 # Ejemplo de ejecución
 N = int(input("Introduce el tamaño del tablero (1 ≤ N ≤ 8): "))
-todas_soluciones = n_reinas_todas(N)
+todas_soluciones = n_reinas_todas(N)  # Obtener todas las soluciones
 
 print(f"Se encontraron {len(todas_soluciones)} soluciones.\n")
+# Imprimir cada solución encontrada
 for sol in todas_soluciones:
     imprimir_tablero(sol)
