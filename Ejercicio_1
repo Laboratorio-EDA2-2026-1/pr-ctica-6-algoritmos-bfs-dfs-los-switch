@@ -1,0 +1,68 @@
+def n_reinas_todas(N):
+    """
+    Args:
+        N: Tamaño del tablero (1 ≤ N ≤ 8)
+    
+    Returns:
+        Lista de soluciones, donde cada solución es una lista P con 
+        P[i] indicando la fila en la que se coloca la reina en la columna i.
+    """
+    
+    def no_conflictos(tablero, actual):
+        """
+        Verifica que no hay conflictos de fila ni diagonales 
+        con las reinas ya colocadas.
+        """
+        for i in range(actual):
+            if tablero[i] == tablero[actual] or abs(tablero[actual] - tablero[i]) == abs(actual - i):
+                return False
+        return True
+
+    def dfs(tablero, actual, tamaño, soluciones):
+        """
+        Coloca reinas recursivamente con búsqueda en profundidad (DFS),
+        guardando todas las soluciones.
+        """
+        if actual == tamaño:
+            # Guardar una copia de la solución
+            soluciones.append(tablero.copy())
+            return
+        
+        for fila in range(tamaño):
+            tablero[actual] = fila
+            if no_conflictos(tablero, actual):
+                dfs(tablero, actual + 1, tamaño, soluciones)
+
+    tablero = [-1] * N
+    soluciones = []
+    dfs(tablero, 0, N, soluciones)
+    return soluciones
+
+
+def imprimir_tablero(solucion):
+    """
+    Imprime visualmente el tablero con las posiciones de las reinas.
+    """
+    if not solucion:
+        print("No hay soluciones")
+        return
+    
+    N = len(solucion)
+    print("Solución:", solucion)
+    print("Representación del tablero:\n")
+    
+    print("   " + " ".join(str(i) for i in range(N)))
+    
+    for fila in range(N):
+        fila_tablero = ["Q" if solucion[col] == fila else "." for col in range(N)]
+        print(f"{fila}: " + " ".join(fila_tablero))
+    print("\n")
+
+
+# Ejemplo de ejecución
+N = int(input("Introduce el tamaño del tablero (1 ≤ N ≤ 8): "))
+todas_soluciones = n_reinas_todas(N)
+
+print(f"Se encontraron {len(todas_soluciones)} soluciones.\n")
+for sol in todas_soluciones:
+    imprimir_tablero(sol)
